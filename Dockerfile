@@ -1,6 +1,6 @@
-ARG LANGUAGETOOL_VERSION=6.0
+ARG LANGUAGETOOL_VERSION=6.3-branch
 
-FROM debian:buster as build
+FROM debian:bookworm as build
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -9,11 +9,19 @@ RUN apt-get update -y \
     locales \
     bash \
     libgomp1 \
-    openjdk-11-jdk-headless \
+    openjdk-17-jdk-headless \
     git \
     maven \
     unzip \
     xmlstarlet \
+
+    # packages required for arm64-workaround
+    build-essential \
+    cmake \
+    mercurial \
+    texlive \
+    wget \
+    zip \
     && apt-get clean
 
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -31,15 +39,19 @@ RUN LANGUAGETOOL_DIST_FOLDER=$(find /dist/ -name 'LanguageTool-*') && mv $LANGUA
 # Execute workarounds for ARM64 architectures.
 # https://github.com/languagetool-org/languagetool/issues/4543
 WORKDIR /
-COPY arm64-workaround/. .
-RUN chmod +x ./bridj.sh ./hunspell.sh
-RUN bash -c "./bridj.sh"
-RUN bash -c "./hunspell.sh"
+COPY arm64-workaround/bridj.sh arm64-workaround/bridj.sh
+RUN chmod +x arm64-workaround/bridj.sh
+RUN bash -c "arm64-workaround/bridj.sh"
+
+COPY arm64-workaround/hunspell.sh arm64-workaround/hunspell.sh
+RUN chmod +x arm64-workaround/hunspell.sh
+RUN bash -c "arm64-workaround/hunspell.sh"
+
 WORKDIR /languagetool
 
 # Note: When changing the base image, verify that the hunspell.sh workaround is
 # downloading the matching version of `libhunspell`. The URL may need to change.
-FROM alpine:3.17.1
+FROM alpine:3.19.0
 
 RUN apk add --no-cache \
     bash \
@@ -47,9 +59,6 @@ RUN apk add --no-cache \
     libc6-compat \
     libstdc++ \
     openjdk11-jre-headless
-
-# https://github.com/Erikvl87/docker-languagetool/issues/60
-RUN ln -s /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2
 
 RUN addgroup -S languagetool && adduser -S languagetool -G languagetool
 
