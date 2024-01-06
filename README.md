@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/Erikvl87/docker-languagetool/workflows/Build/badge.svg)](https://github.com/Erikvl87/docker-languagetool) [![Tests Status](https://github.com/Erikvl87/docker-languagetool/workflows/Tests/badge.svg)](https://github.com/Erikvl87/docker-languagetool) [![Docker Pulls](https://img.shields.io/docker/pulls/erikvl87/languagetool)](https://hub.docker.com/r/erikvl87/languagetool) [![Latest GitHub tag](https://img.shields.io/github/v/tag/Erikvl87/docker-languagetool?label=GitHub%20tag)](https://github.com/Erikvl87/docker-languagetool/releases)
+[![Build Status](https://github.com/Erikvl87/docker-languagetool/workflows/Build/badge.svg)](https://github.com/Erikvl87/docker-languagetool) [![Tests Status](https://github.com/Erikvl87/docker-languagetool/workflows/Tests/badge.svg)](https://github.com/Erikvl87/docker-languagetool) [![Docker Pulls](https://img.shields.io/docker/pulls/mexateam/languagetool-mexa)](https://hub.docker.com/r/mexateam/languagetool-mexa) [![Latest GitHub tag](https://img.shields.io/github/v/tag/Erikvl87/docker-languagetool?label=GitHub%20tag)](https://github.com/Erikvl87/docker-languagetool/releases)
 
 # Dockerfile for LanguageTool
 This repository contains a Dockerfile to create a Docker image for [LanguageTool](https://github.com/languagetool-org/languagetool).
@@ -10,19 +10,19 @@ This repository contains a Dockerfile to create a Docker image for [LanguageTool
 ## Setup using Docker Hub
 
 ```sh
-docker pull erikvl87/languagetool
-docker run --rm -p 8010:8010 erikvl87/languagetool
+docker pull mexateam/languagetool-mexa
+docker run --rm -p 8010:8010 languagetool-mexa
 ```
 
-This will pull the `latest` tag from Docker Hub. Optionally, specify a [tag](https://hub.docker.com/r/erikvl87/languagetool/tags) to pin onto a fixed version. These versions are derived from the official LanguageTool releases. Updates to the Dockerfile for already published versions are released with a `-dockerupdate-{X}` postfix in the tag (where `{X}` is an incremental number).
+This will pull the `latest` tag from Docker Hub. Optionally, specify a [tag](https://hub.docker.com/r/mexateam/languagetool-mexa/tags) to pin onto a fixed version. These versions are derived from the official LanguageTool releases. Updates to the Dockerfile for already published versions are released with a `-dockerupdate-{X}` postfix in the tag (where `{X}` is an incremental number).
 
 ## Setup using the Dockerfile
 This approach could be used when you plan to make changes to the `Dockerfile`.
 
 ```sh
-git clone https://github.com/Erikvl87/docker-languagetool.git --config core.autocrlf=input
-docker build -t languagetool .
-docker run --rm -it -p 8010:8010 languagetool
+git clone https://github.com/mexa-team/docker-languagetool.git --config core.autocrlf=input
+docker build -t languagetool-mexa .
+docker run --rm -it -p 8010:8010 languagetool-mexa
 ```
 
 # Configuration
@@ -33,7 +33,7 @@ LanguageTool will be started with a minimal heap size (`-Xms`) of `256m` and a m
 An example startup configuration:
 
 ```sh
-docker run --rm -it -p 8010:8010 -e Java_Xms=512m -e Java_Xmx=2g erikvl87/languagetool
+docker run --rm -it -p 8010:8010 -e Java_Xms=512m -e Java_Xmx=2g mexateam/languagetool-mexa
 ```
 
 ## LanguageTool HTTPServerConfig
@@ -42,7 +42,7 @@ You are able to use the [HTTPServerConfig](https://languagetool.org/development/
 An example startup configuration:
 
 ```sh
-docker run --rm -it -p 8010:8010 -e langtool_pipelinePrewarming=true -e Java_Xms=1g -e Java_Xmx=2g erikvl87/languagetool
+docker run --rm -it -p 8010:8010 -e langtool_pipelinePrewarming=true -e Java_Xms=1g -e Java_Xmx=2g mexateam/languagetool-mexa
 ```
 
 ## Using n-gram datasets
@@ -71,7 +71,7 @@ Mount the local ngrams directory to the `/ngrams` directory in the Docker contai
 An example startup configuration:
 
 ```sh
-docker run --rm -it -p 8010:8010 -e langtool_languageModel=/ngrams -v home/john/ngrams:/ngrams erikvl87/languagetool
+docker run --rm -it -p 8010:8010 -e langtool_languageModel=/ngrams -v home/john/ngrams:/ngrams mexateam/languagetool-mexa
 ```
 
 ## Improving the spell checker
@@ -86,7 +86,7 @@ docker run --rm -it -p 8010:8010 -e langtool_languageModel=/ngrams -v home/john/
 The following `Dockerfile` contains an example on how to add words to `spelling.txt`. It assumes you have your own list of words in `en_spelling_additions.txt` next to the `Dockerfile`.
 
 ```dockerfile
-FROM erikvl87/languagetool
+FROM mexateam/languagetool-mexa
 
 # Improving the spell checker
 # http://wiki.languagetool.org/hunspell-support
