@@ -14,8 +14,6 @@ RUN apt-get update -y \
     maven \
     unzip \
     xmlstarlet \
-
-    # packages required for arm64-workaround
     build-essential \
     cmake \
     mercurial \
@@ -30,22 +28,12 @@ RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
 ENV LANG en_US.UTF-8
 
 ARG LANGUAGETOOL_VERSION
-RUN git clone https://github.com/mexa-team/languagetool --depth 1 -b v${LANGUAGETOOL_VERSION}
+RUN git clone https://github.com/mexa-team/languagetool --depth 1
 WORKDIR /languagetool
 RUN ["mvn", "--projects", "languagetool-standalone", "--also-make", "package", "-DskipTests", "--quiet"]
 RUN LANGUAGETOOL_DIST_VERSION=$(xmlstarlet sel -N "x=http://maven.apache.org/POM/4.0.0" -t -v "//x:project/x:properties/x:revision" pom.xml) && unzip /languagetool/languagetool-standalone/target/LanguageTool-${LANGUAGETOOL_DIST_VERSION}.zip -d /dist
 RUN LANGUAGETOOL_DIST_FOLDER=$(find /dist/ -name 'LanguageTool-*') && mv $LANGUAGETOOL_DIST_FOLDER /dist/LanguageTool
 
-# Execute workarounds for ARM64 architectures.
-# https://github.com/languagetool-org/languagetool/issues/4543
-WORKDIR /
-COPY arm64-workaround/bridj.sh arm64-workaround/bridj.sh
-RUN chmod +x arm64-workaround/bridj.sh
-RUN bash -c "arm64-workaround/bridj.sh"
-
-COPY arm64-workaround/hunspell.sh arm64-workaround/hunspell.sh
-RUN chmod +x arm64-workaround/hunspell.sh
-RUN bash -c "arm64-workaround/hunspell.sh"
 
 WORKDIR /languagetool
 
@@ -69,13 +57,13 @@ WORKDIR /LanguageTool
 RUN mkdir /nonexistent && touch /nonexistent/.languagetool.cfg
 
 COPY --chown=languagetool start.sh start.sh
-
+RUN dos2unix start.sh
 COPY --chown=languagetool config.properties config.properties
 
 USER languagetool
 
 HEALTHCHECK --timeout=10s --start-period=5s CMD curl --fail --data "language=en-US&text=a simple test" http://localhost:8010/v2/check || exit 1
 
-CMD [ "bash", "start.sh" ]
+CMD [ "bash", "/LanguageTool/start.sh" ]
 
 EXPOSE 8010
